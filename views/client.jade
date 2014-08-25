@@ -4,9 +4,9 @@ html(ng-app="portalRender", ng-controller="SiteCtrl")
     title(ng-bind="Site.title")
     link(rel='stylesheet', type="text/css", href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
   body
-
-    input#message(type="text")
-    button#messageSender(type="submit") 发送
+    form#messageFrom
+        input#message(type="text")
+        button#messageSender(type="submit") 发送
     ul#messages.unstyled
 
     script(type="text/javascript", src="/bower_components/jquery/dist/jquery.min.js")
