@@ -1,7 +1,8 @@
 
+var redisConfig = require("./config/redis")
 var redisConnection = {
-  port: 6379,
-  host: "localdb"
+  port: redisConfig.port,
+  host: redisConfig.host
 }
 var redisHost = redisConnection.host + ":" + redisConnection.port
 
@@ -28,6 +29,17 @@ var userDisconnect = function(usercode, socketId, callback) {
 var userConnectionCount = function(usercode, callback) {
   client.scard("cs:user:sockets:" + usercode, callback);
 }
+var userSockets = function(usercode, callback){
+  client.smembers("cs:user:sockets:" + usercode, callback);
+}
+var clearSockets = function(usercode){
+  userSockets(usercode, function(err, socketIds) {
+    for(var i in socketIds){
+      var socketId = socketIds[i];
+      userDisconnect(usercode, socketId, function(){})
+    }
+  })
+}
 
 
 var setUserOnline = function(usercode, callback) {
@@ -41,6 +53,12 @@ var setUserOffline = function(usercode, callback) {
 var getOnlineUsers = function(callback){
   client.smembers("cs:online-users", callback);
 }
+
+getOnlineUsers(function(err, usercodes){
+  for(var i in usercodes){
+    clearSockets(usercodes[i])
+  }
+})
 
 
 exports.onlineUsers = getOnlineUsers;
