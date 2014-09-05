@@ -41,7 +41,7 @@ createUser = function(newUserId, callback) {
     dataType: "json",
     data: data,
     type: "POST",
-    url: "/_jmd/api/users",
+    url: "/api/users",
     success: callback
   })
 }

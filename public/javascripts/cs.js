@@ -14,7 +14,7 @@ angular.module("customerService", ['ui.router', 'restangular', 'uuid4', 'ngCooki
 
 angular.module('customerService').run(function(){})
 angular.module('customerService').config(function(RestangularProvider){
-  RestangularProvider.setBaseUrl('/_jmd/api');
+  RestangularProvider.setBaseUrl('/api');
 })
 
 
