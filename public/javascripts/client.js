@@ -23,7 +23,7 @@ showMessage = function(message, isMine){
 
 startSocket = function(){
 
-  var socket = io.connect('http://localhost');
+  var socket = io.connect('');
   socket.on('ready', function (data) {
   });
 
