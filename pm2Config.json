@@ -1,0 +1,11 @@
+{
+    "name"        : "realtime-customer-service",
+    "script"      : "bin/www",
+    "error_file" : "../shared/app-err.log",
+    "out_file"   : "../shared/app-out.log",
+    "pid_file"   : "../shared/app.pid",
+    "port"       : 24800,
+    "env": {
+        "NODE_ENV": "production"
+    }
+}
