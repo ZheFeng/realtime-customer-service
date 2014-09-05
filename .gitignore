@@ -6,3 +6,5 @@ npm-debug.log
 public/bower_components/
 public/compile/
 config/
+!config/deploy.rb
+!config/deploy/
