@@ -1,15 +1,77 @@
 doctype html
-html(ng-app="portalRender", ng-controller="SiteCtrl")
+html(ng-app="customerService", ng-controller="DeskCtrl")
   head
     title(ng-bind="Site.title")
     link(rel='stylesheet', type="text/css", href='/bower_components/bootstrap/dist/css/bootstrap.min.css')
+    style.
+        body{
+            position: relative;
+        }
+        .user-list{
+            position: fixed;
+            top: 1px;
+            left: 1px;
+        }
+        .messages{
+            margin-top: 30px;
+            margin-bottom: 50px;
+        }
   body
 
-    input#message(type="text")
-    button#messageSender(type="submit") 发送
-    ul#messages.unstyled
+    //- var a = $('<a id="clinet-'+client.usercode+'" class="list-group-item offline" style="cursor: pointer;">'+client.usercode+' <span>(在线)</span></a>')
+    div: .container
+        .row
+            .col-md-12
+        .row
+            .col-md-3.user-list
+                h3 在线用户
+                .list-group
+                    a.list-group-item(ng-repeat="user in users", ng-click="selectUser(user)", ng-show="user.online", ng-class="{active: user == selectedUser}", style="cursor: pointer;")
+                        | {{user.displayName}}
+                        span(ng-hide="userUnread[user.usercode] < 1")  ({{userUnread[user.usercode]}})
+                h3 离线用户
+                .list-group
+                    a.list-group-item(ng-repeat="user in users", ng-click="selectUser(user)", ng-hide="user.online", ng-class="{offline: !user.online, online: user.online, active: user == selectedUser}", style="cursor: pointer;")
+                        | {{user.displayName}}
+            .col-md-7.col-md-offset-4.messages
+                //- a.btn.btn-default(ng-click="messageHistory()", ng-hide="showHistory[selectedUser.usercode]") 历史记录
+                ul.list-unstyled
+                    li(ng-repeat="data in historyMessages[selectedUser.usercode] track by $index")
+                        .well.well-sm(ng-class="{'pull-left': data.from == selectedUser.usercode, 'pull-right': data.from != selectedUser.usercode}") {{data.message}}
+                        .clearfix
+                ul.list-unstyled
+                    li(ng-repeat="data in userMessages[selectedUser.usercode]")
+                        .well.well-sm(ng-class="{'pull-left': data.from == selectedUser.usercode, 'pull-right': data.from != selectedUser.usercode}") {{data.message}}
+                        .clearfix
+    .navbar.navbar-default.navbar-fixed-bottom
+        .container
+                form.navbar-form.navbar-right(ng-submit="sendMessage()")
+                    .form-group
+                        input.form-control(type="text", ng-model="message")
+                    button.btn.btn-default(type="submit") 发送
 
-    script(type="text/javascript", src="/bower_components/jquery/dist/jquery.min.js")
+
+
     script(type="text/javascript", src="/socket.io/socket.io.js")
+    script(type="text/javascript", src="/bower_components/lodash/dist/lodash.min.js")
+    script(type="text/javascript", src="/bower_components/async/lib/async.js")
+    script(type="text/javascript", src="/bower_components/momentjs/min/moment.min.js")
+    script(type="text/javascript", src="/bower_components/jquery/dist/jquery.min.js")
+    //- script(type="text/javascript", src="/bower_components/highcharts/highcharts.js")
+
+
+    //- script(type="text/javascript", src="/bower_components/intro.js/minified/intro.min.js")
+    //- script(type="text/javascript", src="/bower_components/nprogress/nprogress.js")
+    script(type="text/javascript", src="/bower_components/bootstrap/dist/js/bootstrap.min.js")
+    script(type="text/javascript", src="/bower_components/angular/angular.min.js")
+    script(type="text/javascript", src="/bower_components/restangular/dist/restangular.min.js")
+    script(type="text/javascript", src="/bower_components/angular-ui-router/release/angular-ui-router.min.js")
+    script(type="text/javascript", src="/bower_components/angular-uuid4/angular-uuid4.min.js")
+    script(type="text/javascript", src="/bower_components/angular-cookies/angular-cookies.min.js")
+    //- script(type="text/javascript", src="/bower_components/highcharts-ng/dist/highcharts-ng.min.js")
+
+
+    //- script(type="text/javascript", src="/bower_components/jquery/dist/jquery.min.js")
+    //- script(type="text/javascript", src="/bower_components/jquery/dist/jquery.min.js")
     script(type="text/javascript", src="/javascripts/cs.js")
 

@@ -6,15 +6,129 @@
 var csIdKey = "__jmd_cschat_csId"
 var csId = Cookies.get(csIdKey);
 if(!csId) {
-  csId = 'Anonymous-' + Math.round(Math.random() * 1000) + '-' + (Date.now ? Date.now() : Math.round(Math.random() * 1000))
+  csId = "cs"
   Cookies.set(csIdKey, csId);
 }
 
+angular.module("customerService", ['ui.router', 'restangular', 'uuid4', 'ngCookies']);
 
-
-var socket = io.connect('http://localhost');
-socket.on('ready', function (data) {
-});
-socket.on("clientMessage", function(data){
-  console.log(data);
+angular.module('customerService').run(function(){})
+angular.module('customerService').config(function(RestangularProvider){
+  RestangularProvider.setBaseUrl('/api');
 })
+
+
+angular.module('customerService').controller("DeskCtrl", function($scope, Restangular){
+  $scope.selectedUser = null;
+  $scope.users = [];
+  $scope.onlineUsercodes = [];
+  $scope.userMessages = {};
+  $scope.userUnread = {};
+  $scope.historyMessages = {};
+  // $scope.showHistory = {};
+  $scope.message = "";
+
+  var scrollBottom = function(){
+    setTimeout(function(){
+      $("html, body").animate({ scrollTop: $(document).height() }, 100);
+    }, 100)
+  }
+
+  $scope.selectUser = function(user){
+    $scope.selectedUser = user;
+    $scope.userUnread[user.usercode] = 0;
+    scrollBottom();
+  }
+  $scope.sendMessage = function(){
+    usercode = $scope.selectedUser.usercode;
+    message = $scope.message;
+    if (sendMessage(message, usercode)){
+      $scope.userMessages[usercode] = $scope.userMessages[usercode] || []
+      $scope.userMessages[usercode].push({message: message});
+      $scope.message = "";
+      scrollBottom();
+    }
+  }
+  $scope.messageHistory = function(){
+    usercode = $scope.selectedUser.usercode;
+    $scope.showHistory[usercode] = true;
+    getChatHistory(usercode, function(messages){
+        $scope.historyMessages[usercode] = $scope.historyMessages[usercode] || []
+        for( var i = 0; i < messages.length; i++) {
+          var message = messages[i];
+          $scope.historyMessages[usercode].push(message);
+        }
+
+        scrollBottom();
+    })
+  }
+  var getChatHistory = function (usercode) {
+    Restangular.one("messages").getList("", {usercode: usercode}).then(function(messages){
+        for( var i = 0; i < messages.length; i++) {
+          var message = messages[i];
+          $scope.historyMessages[usercode].push(message);
+        }
+    })
+  }
+  var updateUsers = function(users){
+    for(var i in users){
+      var user  = users[i];
+      var usercode = user.usercode
+      var userExist = _.findIndex($scope.users, { 'usercode': usercode }) >= 0;
+      if(!userExist) {
+        $scope.historyMessages[usercode] = []
+        $scope.userMessages[usercode] = []
+        $scope.userUnread[usercode] = 0
+        $scope.users.push(user);
+        getChatHistory(user.usercode);
+      }
+    }
+  }
+  var updateOnlineStatus = function(onlineUsercodes){
+    for (var i in $scope.users) {
+      var user = $scope.users[i];
+      user.online = onlineUsercodes.indexOf(user.usercode) >= 0;
+      if(user.username){
+        user.displayName = user.username;
+      }
+      else{
+        user.displayName = "匿名客户";
+      }
+    }
+  }
+
+  var socket = io.connect('');
+
+  var sendMessage = function (message, usercode) {
+    if (message.replace(" ", "") != ""){
+      socket.emit("csMessage", {message: message, to: usercode})
+      return true;
+    }
+    return false;
+  }
+  socket.on('ready', function (data) { });
+  socket.on("clientMessage", function(data){
+    $scope.userMessages[data.from].push(data);
+    if (data.from != $scope.selectedUser.usercode) {
+      $scope.userUnread[data.from]++;
+    }
+    $scope.$digest()
+    scrollBottom();
+  })
+  socket.on("onlineUsers", function(data){
+    updateUsers(data.users);
+    updateOnlineStatus(data.online);
+    if($scope.selectedUser == null && $scope.users.length > 0){
+      if (data.online.length > 0){
+        $scope.selectedUser = _.find($scope.users,function(user){ return data.online.indexOf(user.usercode) >= 0;});
+      }
+      else{
+        $scope.selectedUser = $scope.users[0];
+      }
+
+    }
+    $scope.$digest()
+  })
+
+})
+
