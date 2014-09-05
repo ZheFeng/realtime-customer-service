@@ -5,7 +5,8 @@ var sequelize = require("../models").sequelize
 
 /* GET home page. */
 router.get('/', function(req, res) {
-  res.render('index', { title: 'Express' });
+  // res.render('index', { title: 'Express' });
+  res.render('cs', { title: 'Express' });
 });
 
 
